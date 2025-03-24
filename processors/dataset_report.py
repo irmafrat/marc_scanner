@@ -30,24 +30,28 @@ class DataSetReport(BaseProcessor):
     def is_dataset_record(record: Record):
         is_dataset = False
         for f090 in record.get_fields("090"):
-            # if "yuldset" in f090.value():
-            # if "yuldset" in f090.value():
+            # Consider dataset by Yale local call number at https://web.library.yale.edu/cataloging/manuscript/0xx
             if re.match(r"yuldset", f090.value()):
+                is_dataset = True
+                break
+        for f336 in record.get_fields("336"):
+            # Matches quicksearch filter at https://github.com/yalelibrary/search-frontend/blob/main/lib/traject/macros/marc_format_classifier.rb
+            if re.match(r"dataset", f336.value()):
                 is_dataset = True
                 break
         return is_dataset
     
     def marc_record(self, record: Record):
         """Generate report that includes fields
-        001, 090, 245, 264, 300 and 856 for bibligraphic
+        001, 090, 245, 264, 300, 336 and 856 for bibligraphic
         datasets and related holdings that may have 856.
 
         Args:
             record: Record: _description_
         """
-        fields = [ "001", "090", "245", "264", "300","856" ]
-        hold_fields = [ "001", "004", "852", "856"]
-        repeatable_fields = ["090", "264", "300", "852", "856"]
+        fields = [ "001", "090", "245", "264", "300", "336","852" ,"856" ]
+        hold_fields = ["001","004","090","245","264","300","336","852","856"]
+        repeatable_fields = ["090", "264", "300", "336", "852", "856"]
         if is_holding(record):
             # Holding Record Processing
             try:
