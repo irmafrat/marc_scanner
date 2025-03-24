@@ -2,6 +2,7 @@ from base_processor import BaseProcessor
 from marc.marc_helpers import is_holding, Record, record_type
 from sys import stderr
 import re
+import json
 
 def extract_record_fields(record: Record, fields: list[str], repeatable_fields: list[str]):
         """This function is a utility to extract MARC fields from a Record object and return a dictionary"""
@@ -57,7 +58,7 @@ class DataSetReport(BaseProcessor):
             try:
                 if self.is_dataset_holding(record):
                     hold_dict = extract_record_fields(record, hold_fields, repeatable_fields)
-                    print(hold_dict)
+                    print(json.dumps(hold_dict))
             except IndexError:
                 hold_dict = extract_record_fields(record, ["001","090","245","264","300","004","852","856"], repeatable_fields)
                 known_error = False
@@ -65,7 +66,7 @@ class DataSetReport(BaseProcessor):
                     if "circBDIR" in v852:
                         known_error = True
                 if not known_error:
-                    print(hold_dict, file=stderr)
+                    print(json.dumps(hold_dict), file=stderr)
         else:
             # Bibligraphic Record Processing
             if DataSetReport.is_dataset_record(record):
@@ -74,5 +75,5 @@ class DataSetReport(BaseProcessor):
                         self.dataset_bibids.add(bib_dict["001"])
                     else:
                         print(f"WARNING Missing 001: {bib_dict}", file=stderr)
-                    print(bib_dict)
+                    print(json.dumps(bib_dict))
 
